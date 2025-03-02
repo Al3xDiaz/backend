@@ -1,0 +1,8 @@
+services:
+  backend:
+    build: .
+    container_name: chaoticteam-backend
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-dev}
