@@ -12,6 +12,9 @@ services:
       SPRING_DATASOURCE_DB_NAME: chaoticteamdb
       SPRING_DATASOURCE_DB_HOST: db
       SPRING_DATASOURCE_DB_PORT: 5432
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_EXPIRATION: ${JWT_EXPIRATION}
+      # SPRING_PROFILES_ACTIVE: ${ENV:-dev}
     volumes:
       - ./src:/app/src  # Monta el código fuente local en el contenedor
       - ./target:/app/target  # Monta la carpeta target para compilación

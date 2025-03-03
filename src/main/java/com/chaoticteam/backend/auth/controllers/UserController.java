@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.chaoticteam.backend.auth.entities.User;
+import com.chaoticteam.backend.auth.entities.UserEntity;
 import com.chaoticteam.backend.auth.services.UserService;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -33,12 +33,12 @@ public class UserController {
                 description = "OK",
                 content = @Content(
                     mediaType = "application/json",
-                    schema = @Schema(implementation = User.class)
+                    schema = @Schema(implementation = UserEntity.class)
                 )
             )
         }
     )
-    public List<User> getAll() {
+    public List<UserEntity> getAll() {
         // Retorna simplemente "OK"
         return service.listUsers();
     }
