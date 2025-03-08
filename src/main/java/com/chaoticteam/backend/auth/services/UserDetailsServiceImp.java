@@ -1,6 +1,5 @@
 package com.chaoticteam.backend.auth.services;
 
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -9,7 +8,6 @@ import org.springframework.stereotype.Service;
 import com.chaoticteam.backend.auth.entities.UserEntity;
 import com.chaoticteam.backend.auth.repsository.UserRepository;
 
-import lombok.var;
 
 @Service
 public class UserDetailsServiceImp implements UserDetailsService {
@@ -19,7 +17,7 @@ public class UserDetailsServiceImp implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        var user = repository.findByUsername(username)
+        UserEntity user = repository.findByUsername(username)
             .orElse(null);
         String authorities = "without role";
         if (user.getRoleEntity() != null) {

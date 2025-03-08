@@ -25,7 +25,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 
 @RestController
 @RequestMapping("/api/auth")
-@Tag(name = "Login", description = "Login user")
+@Tag(name = "Auth", description = "Module auth")
 public class LoginController {
 
     @Autowired
