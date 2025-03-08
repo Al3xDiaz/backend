@@ -9,6 +9,8 @@ import org.springframework.stereotype.Service;
 import com.chaoticteam.backend.auth.entities.UserEntity;
 import com.chaoticteam.backend.auth.repsository.UserRepository;
 
+import lombok.var;
+
 @Service
 public class UserDetailsServiceImp implements UserDetailsService {
 
@@ -17,16 +19,29 @@ public class UserDetailsServiceImp implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        UserEntity user = repository.findByUsername(username)
-            .orElseThrow(()-> new UsernameNotFoundException("username: " + username + " not found"));
-
-        String authorities = user.getRoleEntity().getName();
-
+        var user = repository.findByUsername(username)
+            .orElse(null);
+        String authorities = "without role";
+        if (user.getRoleEntity() != null) {
+            authorities = user.getRoleEntity().getName();
+        }
         return org.springframework.security.core.userdetails.User
             .withUsername(user.getUsername())
             .password(user.getPassword())
             .roles(authorities)
             .build();
+    }
+
+    public UserEntity saveUser(String username,String email, String password) {
+        // if(repository.findByUsername(username).orElse(null) != null || repository.findByEmail(email).orElse(null) != null) {
+
+        //     System.out.println(e);
+        //     throw new RuntimeException("User already exists");
+        // }
+
+        UserEntity entity = new UserEntity(username, email, password);
+        entity.setRoleEntity(null);
+        return repository.save(entity);
     }
 
 }

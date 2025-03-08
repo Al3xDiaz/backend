@@ -34,7 +34,8 @@ public class SecurityConfig {
         //  .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // Configurar sesiones sin estado
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/api/health").permitAll()
-            .requestMatchers("/api/auth/login").permitAll()
+                .requestMatchers("/api/auth/login").permitAll()
+                .requestMatchers("/api/auth/signup").permitAll()
                 .anyRequest().authenticated() // El resto de los endpoints requieren autenticación
             )
             .httpBasic(Customizer.withDefaults()) // Configurar autenticación básica

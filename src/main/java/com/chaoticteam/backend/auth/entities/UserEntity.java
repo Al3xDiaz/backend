@@ -16,6 +16,16 @@ import lombok.Setter;
 @Table(name = "users")
 public class UserEntity {
 
+    public UserEntity() {
+        this.roleEntity = null;
+    }
+    public UserEntity(String username, String email, String password) {
+        this.username = username;
+        this.email = email;
+        this.password = password;
+        this.roleEntity = null;
+    }
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -25,7 +35,7 @@ public class UserEntity {
     private String password;
 
     // foreign key to RoleEntity one to many
-    @ManyToOne
-    @JoinColumn(name = "role_id")
+    @ManyToOne(optional = true)
+    @JoinColumn(name = "role_id", nullable = true)
     private RoleEntity roleEntity;
 }
