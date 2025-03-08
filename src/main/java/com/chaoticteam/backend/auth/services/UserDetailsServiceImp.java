@@ -33,11 +33,12 @@ public class UserDetailsServiceImp implements UserDetailsService {
     }
 
     public UserEntity saveUser(String username,String email, String password) {
-        // if(repository.findByUsername(username).orElse(null) != null || repository.findByEmail(email).orElse(null) != null) {
-
-        //     System.out.println(e);
-        //     throw new RuntimeException("User already exists");
-        // }
+        if (repository.findByUsername(username).isPresent()) {
+            throw new RuntimeException("User already exists");
+        }
+        if (repository.findByEmail(email).isPresent()) {
+            throw new RuntimeException("Email already exists");
+        }
 
         UserEntity entity = new UserEntity(username, email, password);
         entity.setRoleEntity(null);

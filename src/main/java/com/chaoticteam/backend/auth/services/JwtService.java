@@ -17,14 +17,32 @@ public class JwtService {
     @Value("${jwt.secret}")
     private String jwtSecret;
 
-    @Value("${jwt.expiration}")
-    private long expirationTimeLimitInMillis;
+    // @Value("${jwt.expiration}")
+    private long expirationTimeLimitInMillis = 1000 * 60 * 60 * 10; // 10 horas
+
+    // @Value("${jwt.refreshExpiration}")
+    private long refreshExpirationTimeLimitInMillis = 1000 * 60 * 60 * 24 * 7; // 7 días
 
     public String generateToken(UserDetails userDetails){
+        var claims = Jwts.claims().setSubject(userDetails.getUsername());
+        claims.put("roles", userDetails.getAuthorities());
         return Jwts.builder()
+                .setClaims(claims)
                 .setSubject(userDetails.getUsername())
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis()+ expirationTimeLimitInMillis))
+                .signWith(Keys.hmacShaKeyFor(jwtSecret.getBytes()), SignatureAlgorithm.HS256)
+                .compact();
+    }
+
+    public String generateRefreshToken(UserDetails userDetails){
+        var claims = Jwts.claims().setSubject(userDetails.getUsername());
+        claims.put("roles", userDetails.getAuthorities());
+        return Jwts.builder()
+                .setClaims(claims)
+                .setSubject(userDetails.getUsername())
+                .setIssuedAt(new Date())
+                .setExpiration(new Date(System.currentTimeMillis()+ refreshExpirationTimeLimitInMillis))
                 .signWith(Keys.hmacShaKeyFor(jwtSecret.getBytes()), SignatureAlgorithm.HS256)
                 .compact();
     }

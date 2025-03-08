@@ -36,6 +36,7 @@ public class SecurityConfig {
                 .requestMatchers("/api/health").permitAll()
                 .requestMatchers("/api/auth/login").permitAll()
                 .requestMatchers("/api/auth/signup").permitAll()
+                .requestMatchers("/api/auth/refresh").permitAll()
                 .anyRequest().authenticated() // El resto de los endpoints requieren autenticación
             )
             .httpBasic(Customizer.withDefaults()) // Configurar autenticación básica

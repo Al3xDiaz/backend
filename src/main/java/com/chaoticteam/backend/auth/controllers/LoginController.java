@@ -7,9 +7,12 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import com.chaoticteam.backend.auth.dto.AuthenticationRefresTokenRequest;
 import com.chaoticteam.backend.auth.dto.AuthenticationRequest;
 import com.chaoticteam.backend.auth.dto.AuthenticationSignUpRequest;
 import com.chaoticteam.backend.auth.dto.AuthenticationResponse;
@@ -68,7 +71,8 @@ public class LoginController {
 
         final UserDetails userDetails = service.loadUserByUsername(request.getUsername());
         final String jwtToken = jwtService.generateToken(userDetails);
-        return ResponseEntity.ok(new AuthenticationResponse(jwtToken));
+        final String jwtRefreshToken = jwtService.generateRefreshToken(userDetails);
+        return ResponseEntity.ok(new AuthenticationResponse(jwtToken, jwtRefreshToken));
 
     }
 
@@ -94,7 +98,13 @@ public class LoginController {
     )
     public ResponseEntity<AuthenticationResponse> signup(@RequestBody AuthenticationSignUpRequest request) {
         try {
-            service.saveUser(request.getUsername(),request.getEmail(), request.getPassword());
+            BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
+            String encodedPassword = encoder.encode(request.getPassword());
+            service.saveUser(
+                request.getUsername(),
+                request.getEmail(),
+                encodedPassword
+            );
         } catch (Exception e) {
             System.out.println(e);
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
@@ -102,6 +112,38 @@ public class LoginController {
 
         final UserDetails userDetails = service.loadUserByUsername(request.getUsername());
         final String jwtToken = jwtService.generateToken(userDetails);
-        return ResponseEntity.ok(new AuthenticationResponse(jwtToken));
+        final String jwtRefreshToken = jwtService.generateRefreshToken(userDetails);
+        return ResponseEntity.ok(new AuthenticationResponse(jwtToken, jwtRefreshToken));
     }
+
+    // Endpoint para refrescar el token
+    @PostMapping("/refresh")
+    @Operation(
+        summary = "Refresh token",
+        description = "Refresh",
+        parameters = {
+            @Parameter(
+                name = "refreshToken",
+                description = "Refresh",
+                required = true,
+                example = "eyJhbGci"
+            )
+        }
+    )
+    public ResponseEntity<AuthenticationResponse> refresh(@RequestBody AuthenticationRefresTokenRequest request) {
+        try {
+            if (!jwtService.validateToken(request.getRefreshToken())) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+            }
+            final String username = jwtService.getUsernameFromToken(request.getRefreshToken());
+            final UserDetails userDetails = service.loadUserByUsername(username);
+            final String jwtToken = jwtService.generateToken(userDetails);
+            final String jwtRefreshToken = jwtService.generateRefreshToken(userDetails);
+            return ResponseEntity.ok(new AuthenticationResponse(jwtToken, jwtRefreshToken));
+        } catch (Exception e) {
+            System.out.println(e);
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+        }
+    }
+
 }
