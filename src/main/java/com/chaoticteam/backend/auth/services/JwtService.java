@@ -25,8 +25,7 @@ public class JwtService {
                 .setSubject(userDetails.getUsername())
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis()+ expirationTimeLimitInMillis))
-                // .signWith(Keys.hmacShaKeyFor(jwtSecret.getBytes(),SignatureAlgorithm.RS256))
-                .signWith(Keys.hmacShaKeyFor(jwtSecret.getBytes()))
+                .signWith(Keys.hmacShaKeyFor(jwtSecret.getBytes()), SignatureAlgorithm.HS256)
                 .compact();
     }
     // Valida un token JWT

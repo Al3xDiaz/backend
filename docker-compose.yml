@@ -7,32 +7,34 @@ services:
     ports:
       - "8080:8080"
     environment:
-      SPRING_DATASOURCE_USERNAME: user
-      SPRING_DATASOURCE_PASSWORD: password
-      SPRING_DATASOURCE_DB_NAME: chaoticteamdb
-      SPRING_DATASOURCE_DB_HOST: db
-      SPRING_DATASOURCE_DB_PORT: 5432
+      SPRING_DATASOURCE_USERNAME: ${SPRING_DATASOURCE_USERNAME:-user}
+      SPRING_DATASOURCE_PASSWORD: ${SPRING_DATASOURCE_PASSWORD:-password}
+      SPRING_DATASOURCE_DB_NAME: ${SPRING_DATASOURCE_DB_NAME:-chaoticteamdb}
+      SPRING_DATASOURCE_DB_HOST: ${SPRING_DATASOURCE_DB_HOST:-db}
+      SPRING_DATASOURCE_DB_PORT: ${SPRING_DATASOURCE_DB_PORT:-5432}
       JWT_SECRET: ${JWT_SECRET}
       JWT_EXPIRATION: ${JWT_EXPIRATION}
       # SPRING_PROFILES_ACTIVE: ${ENV:-dev}
     volumes:
       - ./src:/app/src  # Monta el código fuente local en el contenedor
       - ./target:/app/target  # Monta la carpeta target para compilación
-    depends_on:
-      - db
+    # depends_on:
+    #   - db
     command: ./mvnw spring-boot:run  # Usamos maven para ejecutar la aplicación en dev
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
 
-  db:
-    image: postgres:alpine
-    container_name: chaoticteam-db
-    environment:
-      POSTGRES_DB: chaoticteamdb
-      POSTGRES_USER: user
-      POSTGRES_PASSWORD: password
-    # ports:
-    #   - "5432:5432"
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
+#   db:
+#     image: postgres:alpine
+#     container_name: chaoticteam-db
+#     environment:
+#       POSTGRES_DB: chaoticteamdb
+#       POSTGRES_USER: user
+#       POSTGRES_PASSWORD: password
+#     # ports:
+#     #   - "5432:5432"
+#     volumes:
+#       - postgres_data:/var/lib/postgresql/data
 
-volumes:
-  postgres_data:
+# volumes:
+#   postgres_data:
