@@ -1,11 +1,9 @@
 package com.chaoticteam.backend.auth.controllers;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -18,15 +16,18 @@ import com.chaoticteam.backend.auth.dto.AuthenticationSignUpRequest;
 import com.chaoticteam.backend.auth.dto.AuthenticationResponse;
 import com.chaoticteam.backend.auth.services.JwtService;
 import com.chaoticteam.backend.auth.services.UserDetailsServiceImp;
+import com.chaoticteam.backend.utlis.HandleTransactionException;
+
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import org.springframework.web.bind.annotation.RequestBody;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.transaction.Transactional;
 
 @RestController
 @RequestMapping("/api/auth")
 @Tag(name = "Auth", description = "Module auth")
-public class LoginController {
+public class AuthController {
 
     @Autowired
     private AuthenticationManager authenticationManager;
@@ -57,23 +58,16 @@ public class LoginController {
             )
         }
     )
+    @HandleTransactionException
     public ResponseEntity<AuthenticationResponse> login(@RequestBody AuthenticationRequest request) {
-        try {
-            System.out.println(request.getUsername());
-            authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(request.getUsername(),request.getPassword())
-            );
-
-        } catch (AuthenticationException e) {
-            System.out.println(e);
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
-        }
-
+        System.out.println(request.getUsername());
+        authenticationManager.authenticate(
+            new UsernamePasswordAuthenticationToken(request.getUsername(),request.getPassword())
+        );
         final UserDetails userDetails = service.loadUserByUsername(request.getUsername());
         final String jwtToken = jwtService.generateToken(userDetails);
         final String jwtRefreshToken = jwtService.generateRefreshToken(userDetails);
-        return ResponseEntity.ok(new AuthenticationResponse(jwtToken, jwtRefreshToken));
-
+        return ResponseEntity.ok(new AuthenticationResponse(request.getUsername(),jwtToken, jwtRefreshToken));
     }
 
     // Endpoint para signup
@@ -93,27 +87,38 @@ public class LoginController {
                 description = "Password",
                 required = true,
                 example = "admin"
+            ),
+            @Parameter(
+                name = "profile",
+                description = "profile values (firstName & lastName)",
+                required = true,
+                example = "{ \"firstName\":\"John\",\"lastName\":\"Doo\"}"
             )
         }
     )
+    @Transactional(
+        rollbackOn = RuntimeException.class
+    )
+    @HandleTransactionException
     public ResponseEntity<AuthenticationResponse> signup(@RequestBody AuthenticationSignUpRequest request) {
-        try {
-            BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
-            String encodedPassword = encoder.encode(request.getPassword());
-            service.saveUser(
-                request.getUsername(),
-                request.getEmail(),
-                encodedPassword
-            );
-        } catch (Exception e) {
-            System.out.println(e);
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
-        }
+        BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
+        String encodedPassword = encoder.encode(request.getPassword());
 
+        // Guardar el perfil y el usuario dentro de la misma transacción
+        service.saveUser(
+            request.getUsername(),
+            request.getEmail(),
+            encodedPassword,
+            request.getProfile().getFirstName(),
+            request.getProfile().getLastName()
+        );
+
+        // Si todo va bien, generar el token JWT
         final UserDetails userDetails = service.loadUserByUsername(request.getUsername());
         final String jwtToken = jwtService.generateToken(userDetails);
         final String jwtRefreshToken = jwtService.generateRefreshToken(userDetails);
-        return ResponseEntity.ok(new AuthenticationResponse(jwtToken, jwtRefreshToken));
+
+        return ResponseEntity.ok(new AuthenticationResponse(request.getUsername(), jwtToken, jwtRefreshToken));
     }
 
     // Endpoint para refrescar el token
@@ -130,20 +135,16 @@ public class LoginController {
             )
         }
     )
+    @HandleTransactionException
     public ResponseEntity<AuthenticationResponse> refresh(@RequestBody AuthenticationRefresTokenRequest request) {
-        try {
-            if (!jwtService.validateToken(request.getRefreshToken())) {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
-            }
-            final String username = jwtService.getUsernameFromToken(request.getRefreshToken());
-            final UserDetails userDetails = service.loadUserByUsername(username);
-            final String jwtToken = jwtService.generateToken(userDetails);
-            final String jwtRefreshToken = jwtService.generateRefreshToken(userDetails);
-            return ResponseEntity.ok(new AuthenticationResponse(jwtToken, jwtRefreshToken));
-        } catch (Exception e) {
-            System.out.println(e);
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+        if (!jwtService.validateToken(request.getRefreshToken())) {
+            throw new RuntimeException("not valid jwt");
         }
+        final String username = jwtService.getUsernameFromToken(request.getRefreshToken());
+        final UserDetails userDetails = service.loadUserByUsername(username);
+        final String jwtToken = jwtService.generateToken(userDetails);
+        final String jwtRefreshToken = jwtService.generateRefreshToken(userDetails);
+        return ResponseEntity.ok(new AuthenticationResponse(userDetails.getUsername(),jwtToken, jwtRefreshToken));
     }
 
 }

@@ -11,4 +11,6 @@ public class AuthenticationSignUpRequest {
     private String username;
     private String email;
     private String password;
+
+    private ProfileRequest profile;
 }

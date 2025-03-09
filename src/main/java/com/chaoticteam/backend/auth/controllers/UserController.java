@@ -39,7 +39,6 @@ public class UserController {
         }
     )
     public List<UserEntity> getAll() {
-        // Retorna simplemente "OK"
         return service.listUsers();
     }
 }

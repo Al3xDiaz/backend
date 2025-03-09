@@ -5,8 +5,11 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
+
+import com.chaoticteam.backend.auth.entities.ProfileEntity;
 import com.chaoticteam.backend.auth.entities.UserEntity;
 import com.chaoticteam.backend.auth.repsository.UserRepository;
+import com.chaoticteam.backend.auth.repsository.ProfileRepository;
 
 
 @Service
@@ -14,6 +17,9 @@ public class UserDetailsServiceImp implements UserDetailsService {
 
     @Autowired
     private UserRepository repository;
+
+    @Autowired
+    private ProfileRepository profileRepository;
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
@@ -30,17 +36,26 @@ public class UserDetailsServiceImp implements UserDetailsService {
             .build();
     }
 
-    public UserEntity saveUser(String username,String email, String password) {
+    public UserEntity saveUser(String username,String email, String password,String firstName, String lastName) throws RuntimeException {
         if (repository.findByUsername(username).isPresent()) {
             throw new RuntimeException("User already exists");
         }
         if (repository.findByEmail(email).isPresent()) {
             throw new RuntimeException("Email already exists");
         }
+        ProfileEntity profile = saveProfileEntity(
+            firstName,
+            lastName
+        );
 
-        UserEntity entity = new UserEntity(username, email, password);
+        UserEntity entity = new UserEntity(username, email, password,profile);
         entity.setRoleEntity(null);
         return repository.save(entity);
+    }
+
+    public ProfileEntity saveProfileEntity(String firstName,String lastName) {
+        ProfileEntity entity = new ProfileEntity(firstName,lastName);
+        return profileRepository.save(entity);
     }
 
 }

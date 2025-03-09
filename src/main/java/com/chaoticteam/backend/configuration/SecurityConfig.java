@@ -33,6 +33,8 @@ public class SecurityConfig {
                 .requestMatchers("/api/auth/login").permitAll()
                 .requestMatchers("/api/auth/signup").permitAll()
                 .requestMatchers("/api/auth/refresh").permitAll()
+                .requestMatchers("/swagger-ui/*").permitAll()
+                .requestMatchers("/v3/**").permitAll()
                 .anyRequest().authenticated() // El resto de los endpoints requieren autenticación
             )
             .httpBasic(Customizer.withDefaults()) // Configurar autenticación básica
