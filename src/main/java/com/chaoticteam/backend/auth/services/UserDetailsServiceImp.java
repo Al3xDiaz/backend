@@ -36,6 +36,10 @@ public class UserDetailsServiceImp implements UserDetailsService {
             .build();
     }
 
+    public UserEntity getUserByUsername(String username) throws RuntimeException{
+        return repository.findByUsername(username).orElseThrow();
+    }
+
     public UserEntity saveUser(String username,String email, String password,String firstName, String lastName) throws RuntimeException {
         if (repository.findByUsername(username).isPresent()) {
             throw new RuntimeException("User already exists");

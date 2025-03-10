@@ -4,19 +4,24 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
+import org.springframework.security.core.Authentication;
 import com.chaoticteam.backend.auth.dto.AuthenticationRefresTokenRequest;
 import com.chaoticteam.backend.auth.dto.AuthenticationRequest;
 import com.chaoticteam.backend.auth.dto.AuthenticationSignUpRequest;
+import com.chaoticteam.backend.auth.entities.UserEntity;
 import com.chaoticteam.backend.auth.dto.AuthenticationResponse;
 import com.chaoticteam.backend.auth.services.JwtService;
 import com.chaoticteam.backend.auth.services.UserDetailsServiceImp;
-import com.chaoticteam.backend.utlis.HandleTransactionException;
+import com.chaoticteam.backend.utils.HandleTransactionException;
+import com.nimbusds.jwt.JWT;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -60,7 +65,6 @@ public class AuthController {
     )
     @HandleTransactionException
     public ResponseEntity<AuthenticationResponse> login(@RequestBody AuthenticationRequest request) {
-        System.out.println(request.getUsername());
         authenticationManager.authenticate(
             new UsernamePasswordAuthenticationToken(request.getUsername(),request.getPassword())
         );
@@ -147,4 +151,17 @@ public class AuthController {
         return ResponseEntity.ok(new AuthenticationResponse(userDetails.getUsername(),jwtToken, jwtRefreshToken));
     }
 
+    // Endpoint getUserData
+    @GetMapping("/userdata")
+    @Operation(
+        summary = "GetUserData",
+        description = "get user data"
+    )
+    @HandleTransactionException
+    public ResponseEntity<UserEntity> getUserData(){
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String username = authentication.getName();
+        UserEntity entity = service.getUserByUsername(username);
+        return ResponseEntity.ok(entity);
+    }
 }

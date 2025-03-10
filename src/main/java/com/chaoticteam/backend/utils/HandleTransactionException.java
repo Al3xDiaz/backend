@@ -1,4 +1,4 @@
-package com.chaoticteam.backend.utlis;
+package com.chaoticteam.backend.utils;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
