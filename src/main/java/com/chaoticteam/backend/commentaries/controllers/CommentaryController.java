@@ -13,6 +13,7 @@ import com.chaoticteam.backend.commentaries.services.CommentariesService;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletRequest;
 
 @RestController
 @RequestMapping("/api/commentaries")
@@ -27,9 +28,10 @@ public class CommentaryController {
         summary = "getCommentaries",
         description = "get commentaries"
     )
-    public ResponseEntity<List<CommentaryEntity>> getComentary(){
+    public ResponseEntity<List<CommentaryEntity>> getComentary(HttpServletRequest request){
+        String siteUrl = request.getRequestURL().toString();
         List<CommentaryEntity> entities;
-        entities = service.list();
+        entities = service.list(siteUrl);
 
         return ResponseEntity.ok(entities);
     }

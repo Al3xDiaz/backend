@@ -14,8 +14,8 @@ public class CommentariesService {
     @Autowired
     private CommentariesRepository repository;
 
-    public List<CommentaryEntity> list(){
-        return repository.findAll();
+    public List<CommentaryEntity> list(String site){
+        return repository.findBySiteUrl(site);
     }
 
 }
