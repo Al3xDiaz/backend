@@ -162,4 +162,17 @@ public class AuthController {
         UserEntity entity = service.getUserByUsername(username);
         return ResponseEntity.ok(entity);
     }
+
+    // Endpoint validateCredentials
+    @PostMapping("/validatecredetial")
+    @Operation(
+        summary = "ValidateCredetial",
+        description = "validate credentials"
+    )
+    public ResponseEntity<UserEntity> validateCredentials(){
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String username = authentication.getName();
+        UserEntity entity = service.getUserByUsername(username);
+        return ResponseEntity.ok(entity);
+    }
 }
