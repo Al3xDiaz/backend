@@ -13,7 +13,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 
 @RestController
 @RequestMapping("/api/")
-@Tag(name = "Basic Config", description = "Module basic config")
+@Tag(name = "basicconfig", description = "Module basic config")
 public class VersionController {
 
     @Value("${config.version}")

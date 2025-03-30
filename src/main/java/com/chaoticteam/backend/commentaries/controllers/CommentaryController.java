@@ -12,12 +12,13 @@ import com.chaoticteam.backend.commentaries.entities.CommentaryEntity;
 import com.chaoticteam.backend.commentaries.services.CommentariesService;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 
 @RestController
 @RequestMapping("/api/commentaries")
-@Tag(name = "Auth", description = "Module auth")
+@Tag(name = "commentary", description = "Module comentaries")
 public class CommentaryController {
 
     @Autowired
@@ -26,7 +27,15 @@ public class CommentaryController {
     @GetMapping
     @Operation(
         summary = "getCommentaries",
-        description = "get commentaries"
+        description = "get commentaries",
+        parameters = {
+            @Parameter(
+                name = "requestURL",
+                description = "site origin",
+                required = true,
+                example = "localhost"
+            )
+        }
     )
     public ResponseEntity<List<CommentaryEntity>> getComentary(HttpServletRequest request){
         String siteUrl = request.getRequestURL().toString();

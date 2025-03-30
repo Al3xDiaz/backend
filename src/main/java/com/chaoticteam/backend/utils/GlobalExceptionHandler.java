@@ -8,7 +8,10 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 
+import io.swagger.v3.oas.annotations.Hidden;
+
 @ControllerAdvice
+@Hidden
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(RuntimeException.class)
@@ -33,8 +36,10 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(Exception.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    public ResponseEntity<Void> handleGenericException(Exception ex) {
-        System.out.println("ErrorType: "+ex.getClass() + ", Error: " + ex.getMessage());
-        return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+    public ResponseEntity<String> handleGenericException(Exception ex) {
+        String outpuString = "ErrorType: "+ex.getClass() + ", Error: " + ex.getMessage();
+        System.out.println(outpuString);
+        outpuString = "an error oucurred";
+        return new ResponseEntity<String>(outpuString,HttpStatus.INTERNAL_SERVER_ERROR);
     }
 }
