@@ -8,11 +8,8 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 
-import io.swagger.v3.oas.annotations.Hidden;
-
 @ControllerAdvice
-@Hidden
-public class GlobalExceptionHandler {
+public class GlobalErrorHandler {
 
     @ExceptionHandler(RuntimeException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
