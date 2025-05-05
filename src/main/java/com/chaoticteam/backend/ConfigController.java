@@ -14,10 +14,20 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 @RestController
 @RequestMapping("/api/")
 @Tag(name = "basicconfig", description = "Module basic config")
-public class VersionController {
+public class ConfigController {
 
     @Value("${config.version}")
     private String version;
+
+    @GetMapping("/health")
+    @Operation(
+        summary = "API Health check",
+        description = "Health check"
+    )
+    @HandleTransactionException
+    public Void healthVoid() {
+        return null;
+    }
 
     @GetMapping("/version")
     @Operation(
@@ -28,5 +38,4 @@ public class VersionController {
     public ResponseEntity<String> getVersion(){
         return ResponseEntity.ok(version);
     }
-
 }
